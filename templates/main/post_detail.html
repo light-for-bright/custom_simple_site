@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - Мой сайт{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    {% if post.image %}
+    <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+    {% endif %}
+    <div class="card-body">
+        <h1 class="card-title">{{ post.title }}</h1>
+        <p class="card-text">
+            <small class="text-muted">
+                Автор: {{ post.author.username }} | 
+                Категория: {{ post.category.name }} |
+                {{ post.created_at|date:"d.m.Y H:i" }}
+            </small>
+        </p>
+        <div class="card-text">
+            {{ post.content|linebreaks }}
+        </div>
+        {% if user == post.author %}
+        <div class="mt-3">
+            <a href="{% url 'post_edit' post.slug %}" class="btn btn-primary">Редактировать</a>
+            <a href="{% url 'post_delete' post.slug %}" class="btn btn-danger">Удалить</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Комментарии</h5>
+    </div>
+    <div class="card-body">
+        {% if user.is_authenticated %}
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            {{ comment_form.as_p }}
+            <button type="submit" class="btn btn-primary">Отправить комментарий</button>
+        </form>
+        {% else %}
+        <p>Пожалуйста, <a href="{% url 'login' %}">войдите</a>, чтобы оставить комментарий.</p>
+        {% endif %}
+
+        {% for comment in comments %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <p class="card-text">{{ comment.content|linebreaks }}</p>
+                <p class="card-text">
+                    <small class="text-muted">
+                        {{ comment.author.username }} | {{ comment.created_at|date:"d.m.Y H:i" }}
+                    </small>
+                </p>
+            </div>
+        </div>
+        {% empty %}
+        <p>Комментариев пока нет.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 
